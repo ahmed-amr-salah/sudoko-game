@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudoku Solver</title>
+  <!-- Vuetify CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <!-- Material Design Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <style>
+    /* Global styles */
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    
+    .sudoku-board {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .main-card {
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .title-gradient {
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: white;
+      padding: 20px !important;
+    }
+    
+    .solve-btn {
+      transition: transform 0.3s ease;
+    }
+    
+    .solve-btn:hover {
+      transform: translateY(-3px);
+    }
+    
+    .board-container {
+      flex: 1;
+      min-width: 300px;
+      max-width: 450px;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .board-title {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+      font-size: 1.2rem;
+      padding: 12px 16px;
+    }
+    
+    .sudoku-grid {
+      display: flex;
+      flex-direction: column;
+      border: 2px solid #333;
+      width: 100%;
+      max-width: 450px;
+      margin: 0 auto;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sudoku-row {
+      display: flex;
+      height: 40px;
+    }
+    
+    .sudoku-row:nth-child(3n) {
+      border-bottom: 2px solid #333;
+    }
+    
+    .sudoku-row:last-child {
+      border-bottom: none;
+    }
+    
+    .sudoku-cell {
+      flex: 1;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ccc;
+      font-size: 1.5rem;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+    
+    .sudoku-cell:nth-child(3n) {
+      border-right: 2px solid #333;
+    }
+    
+    .sudoku-cell:last-child {
+      border-right: none;
+    }
+    
+    .sudoku-cell.filled {
+      background-color: rgba(106, 17, 203, 0.1);
+    }
+    
+    .sudoku-cell.original {
+      color: #6a11cb;
+      font-weight: 900;
+    }
+    
+    .sudoku-cell.solved {
+      color: #11998e;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    
+    .upload-alert {
+      background-color: rgba(106, 17, 203, 0.05);
+      border-left: 4px solid #6a11cb;
+      font-size: 1.1rem;
+      padding: 16px;
+      margin-bottom: 16px;
+      border-radius: 4px;
+    }
+    
+    .upload-input {
+      border: 2px dashed rgba(106, 17, 203, 0.3);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .upload-input:hover {
+      border-color: #6a11cb;
+      background-color: rgba(106, 17, 203, 0.05);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-main>
+        <div class="sudoku-board">
+          <v-card class="main-card" elevation="8">
+            <v-card-title class="title-gradient">
+              <v-icon large class="mr-2">mdi-grid</v-icon>
+              <span>Sudoku Solver</span>
+              <v-spacer></v-spacer>
+              <v-btn 
+                color="accent" 
+                @click="solvePuzzle" 
+                :loading="solving" 
+                :disabled="!puzzleLoaded"
+                class="solve-btn"
+                elevation="4"
+              >
+                <v-icon left>mdi-lightning-bolt</v-icon>
+                <span>Solve</span>
+              </v-btn>
+            </v-card-title>
+            
+            <!-- File Input Section -->
+            <v-card-subtitle class="pt-4">
+              <div class="upload-alert">
+                <strong>Upload a Sudoku puzzle file or select a sample puzzle below</strong>
+              </div>
+              
+              <v-row>
+                <v-col cols="12" md="6">
+                  <v-file-input
+                    v-model="file"
+                    label="Upload Sudoku Puzzle"
+                    accept=".txt"
+                    @change="uploadFile"
+                    prepend-icon="mdi-upload"
+                    outlined
+                    hint="Upload a .txt file with your Sudoku puzzle"
+                    persistent-hint
+                    color="primary"
+                    class="upload-input"
+                    show-size
+                    truncate-length="15"
+                  ></v-file-input>
+                </v-col>
+                <v-col cols="12" md="6">
+                  <v-select
+                    v-model="selectedSample"
+                    label="Or try a sample puzzle"
+                    :items="samplePuzzles"
+                    @change="loadSamplePuzzle"
+                    outlined
+                    hint="Select a pre-defined puzzle to try"
+                    persistent-hint
+                    color="primary"
+                  ></v-select>
+                </v-col>
+              </v-row>
+            </v-card-subtitle>
+            
+            <!-- Status Message -->
+            <v-card-text v-if="statusMessage" class="status-message">
+              <v-alert
+                :type="statusSuccess ? 'success' : 'error'"
+                dense
+                class="status-alert"
+              >
+                {{ statusMessage }}
+              </v-alert>
+            </v-card-text>
+            
+            <!-- Puzzle Display Section -->
+            <v-card-text>
+              <div class="d-flex flex-wrap justify-center">
+                <!-- Original puzzle -->
+                <v-card class="board-container ma-2" elevation="3">
+                  <v-card-title class="board-title">
+                    <v-icon left>mdi-puzzle-outline</v-icon>
+                    <span>Original Puzzle</span>
+                  </v-card-title>
+                  <v-card-text>
+                    <div class="sudoku-grid">
+                      <div v-for="(row, rowIndex) in puzzle" :key="'orig-'+rowIndex" class="sudoku-row">
+                        <div 
+                          v-for="(cell, colIndex) in row" 
+                          :key="'orig-'+rowIndex+'-'+colIndex" 
+                          class="sudoku-cell"
+                          :class="{ 'filled': cell > 0 }"
+                        >
+                          {{ cell > 0 ? cell : '' }}
+                        </div>
+                      </div>
+                    </div>
+                  </v-card-text>
+                </v-card>
+                
+                <!-- Solution -->
+                <v-card class="board-container ma-2" elevation="3">
+                  <v-card-title class="board-title">
+                    <v-icon left>mdi-check-decagram</v-icon>
+                    <span>Solution</span>
+                  </v-card-title>
+                  <v-card-text>
+                    <div class="sudoku-grid">
+                      <div v-for="(row, rowIndex) in solution" :key="'sol-'+rowIndex" class="sudoku-row">
+                        <div 
+                          v-for="(cell, colIndex) in row" 
+                          :key="'sol-'+rowIndex+'-'+colIndex" 
+                          class="sudoku-cell"
+                          :class="{ 
+                            'filled': cell > 0,
+                            'original': puzzle[rowIndex][colIndex] > 0,
+                            'solved': cell > 0 && puzzle[rowIndex][colIndex] === 0
+                          }"
+                        >
+                          {{ cell > 0 ? cell : '' }}
+                        </div>
+                      </div>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </div>
+            </v-card-text>
+          </v-card>
+        </div>
+      </v-main>
+    </v-app>
+  </div>
+
+  <!-- Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <!-- Vuetify -->
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify({
+        theme: {
+          themes: {
+            light: {
+              primary: '#6a11cb',
+              secondary: '#2575fc',
+              accent: '#11998e',
+            },
+          },
+        },
+      }),
+      data: {
+        puzzle: Array(9).fill().map(() => Array(9).fill(0)),
+        solution: Array(9).fill().map(() => Array(9).fill(0)),
+        file: null,
+        selectedSample: null,
+        samplePuzzles: [
+          { text: 'Easy', value: 'easy' },
+          { text: 'Medium', value: 'medium' },
+          { text: 'Hard', value: 'hard' }
+        ],
+        solving: false,
+        statusMessage: '',
+        statusSuccess: true,
+        puzzleLoaded: false,
+        pollInterval: null
+      },
+      
+      mounted() {
+        // Start polling for messages
+        this.startPolling();
+      },
+      
+      beforeDestroy() {
+        // Stop polling when component is destroyed
+        this.stopPolling();
+      },
+      
+      methods: {
+        startPolling() {
+          // Poll for messages every second
+          this.pollInterval = setInterval(() => {
+            this.pollMessages();
+          }, 1000);
+        },
+        
+        stopPolling() {
+          if (this.pollInterval) {
+            clearInterval(this.pollInterval);
+            this.pollInterval = null;
+          }
+        },
+        
+        async pollMessages() {
+          try {
+            const response = await fetch('/api/messages');
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const messages = await response.json();
+            
+            if (messages.length > 0) {
+              for (const message of messages) {
+                this.handleMessage(message);
+              }
+            }
+          } catch (error) {
+            console.error('Error polling messages:', error);
+          }
+        },
+        
+        handleMessage(message) {
+          if (message.type === 'puzzle') {
+            this.puzzle = message.grid;
+            this.puzzleLoaded = true;
+            this.statusMessage = 'Puzzle loaded successfully';
+            this.statusSuccess = true;
+          } else if (message.type === 'solution') {
+            this.solution = message.grid;
+            this.solving = false;
+          } else if (message.type === 'status') {
+            this.statusMessage = message.message;
+            this.statusSuccess = message.success;
+            this.solving = false;
+          } else if (message.type === 'error') {
+            this.statusMessage = message.message;
+            this.statusSuccess = false;
+            this.solving = false;
+          }
+        },
+        
+        async uploadFile() {
+          if (!this.file) return;
+          
+          try {
+            const reader = new FileReader();
+            
+            reader.onload = async (e) => {
+              const content = e.target.result;
+              
+              // Send the file content to the server
+              const response = await fetch('/api/puzzle', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  type: 'file',
+                  filename: this.file.name,
+                  content: content
+                })
+              });
+              
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              
+              this.statusMessage = 'File uploaded, loading puzzle...';
+              this.statusSuccess = true;
+            };
+            
+            reader.readAsText(this.file);
+          } catch (error) {
+            console.error('Error uploading file:', error);
+            this.statusMessage = `Error uploading file: ${error.message}`;
+            this.statusSuccess = false;
+          }
+        },
+        
+        async solvePuzzle() {
+          if (!this.puzzleLoaded) {
+            this.statusMessage = 'Please load a puzzle first';
+            this.statusSuccess = false;
+            return;
+          }
+          
+          this.solving = true;
+          this.statusMessage = 'Solving puzzle...';
+          this.statusSuccess = true;
+          
+          try {
+            const response = await fetch('/api/puzzle', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                type: 'solve'
+              })
+            });
+            
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+          } catch (error) {
+            console.error('Error solving puzzle:', error);
+            this.statusMessage = `Error solving puzzle: ${error.message}`;
+            this.statusSuccess = false;
+            this.solving = false;
+          }
+        },
+        
+        async loadSamplePuzzle(puzzleType) {
+          if (!puzzleType) return;
+          
+          this.statusMessage = `Loading ${puzzleType} sample puzzle...`;
+          this.statusSuccess = true;
+          
+          try {
+            // Read the sample file
+            let filename;
+            switch (puzzleType) {
+              case 'easy':
+                filename = 'sample_sudoku_S.txt';
+                break;
+              case 'medium':
+                filename = 'sample_sudoku_M.txt';
+                break;
+              case 'hard':
+                filename = 'sample_sudoku_H.txt';
+                break;
+              default:
+                throw new Error(`Unknown puzzle type: ${puzzleType}`);
+            }
+            
+            const response = await fetch(`/${filename}`);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const content = await response.text();
+            
+            // Send the file content to the server
+            const uploadResponse = await fetch('/api/puzzle', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                type: 'file',
+                filename: filename,
+                content: content
+              })
+            });
+            
+            if (!uploadResponse.ok) {
+              throw new Error(`HTTP error! status: ${uploadResponse.status}`);
+            }
+          } catch (error) {
+            console.error('Error loading sample puzzle:', error);
+            this.statusMessage = `Error loading sample puzzle: ${error.message}`;
+            this.statusSuccess = false;
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
