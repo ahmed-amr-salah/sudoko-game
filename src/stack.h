@@ -1,6 +1,5 @@
-//header #ifndef STACK_H
+#ifndef STACK_H
 #define STACK_H
-
 
 struct Move {
     int row;
