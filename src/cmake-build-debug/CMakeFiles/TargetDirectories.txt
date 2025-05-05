@@ -1,3 +1,0 @@
-D:/Spring 2025/ADS/sudoko-game/src/cmake-build-debug/CMakeFiles/src.dir
-D:/Spring 2025/ADS/sudoko-game/src/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/Spring 2025/ADS/sudoko-game/src/cmake-build-debug/CMakeFiles/rebuild_cache.dir

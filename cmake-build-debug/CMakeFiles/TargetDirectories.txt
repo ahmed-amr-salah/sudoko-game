@@ -1,3 +1,0 @@
-C:/Users/saras/Desktop/cs projects/sudoko-game/cmake-build-debug/CMakeFiles/sudoko_game.dir
-C:/Users/saras/Desktop/cs projects/sudoko-game/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/saras/Desktop/cs projects/sudoko-game/cmake-build-debug/CMakeFiles/rebuild_cache.dir
