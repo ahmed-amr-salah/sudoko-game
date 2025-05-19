@@ -1,3 +1,47 @@
+# Sudoku Solver
+
+An interactive Sudoku solver application with a modern web-based UI and a powerful C++ backend.
+
+## Getting Started
+
+### Quick Start
+
+The easiest way to run the application is using the provided script:
+
+Make the script executable (if needed)
+    chmod +x run_sudoku_solver.sh
+
+Run the application
+    ./run_sudoku_solver.sh
+
+Create build directory
+    mkdir -p build && cd build
+
+Configure with CMake
+
+cmake ..
+Build
+make
+
+Run the backend
+
+./sudoku_solver --gui
+
+This script will:
+1. Check if the required ports are available
+2. Build the C++ backend if needed
+3. Start the frontend server
+4. Start the backend server
+5. Open the application in your default browser
+
+Once started, you can access the application at: http://localhost:5173
+
+### Manual Setup
+
+If you prefer to set up the application manually:
+
+#### Backend Setup
+
 # Sudoku Graph Implementation
 
 ## Overview

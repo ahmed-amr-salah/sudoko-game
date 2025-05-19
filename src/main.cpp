@@ -285,7 +285,7 @@ int main(int argc, char* argv[]) {
     
     if (guiMode) {
         // GUI mode with WebSocket server
-        SudokuGuiIpc ipc(8080);
+        SudokuGuiIpc ipc(3000);
         Graph sudokuGraph;
         bool puzzleLoaded = false;
         
