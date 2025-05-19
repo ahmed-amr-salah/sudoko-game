@@ -1,65 +1,106 @@
 # Sudoku Solver
 
-An interactive Sudoku solver application with a modern web-based UI and a powerful C++ backend.
+An interactive Sudoku solver with a modern web-based interface and a high-performance C++ backend. The puzzle is represented as a graph-based constraint satisfaction problem using custom-built data structures without the STL.
 
-## Getting Started
+---
+
+## 🚀 Getting Started
 
 ### Quick Start
 
-The easiest way to run the application is using the provided script:
+The easiest way to run the application is via the provided script:
 
-Make the script executable (if needed)
-    chmod +x run_sudoku_solver.sh
+#### 1. Make the script executable (if needed)
 
-Run the application
-    ./run_sudoku_solver.sh
+```bash
+chmod +x run_sudoku_solver.sh
+```
 
-Create build directory
-    mkdir -p build && cd build
+#### 2. Run the application
 
-Configure with CMake
-
-cmake ..
-Build
-make
-
-Run the backend
-
-./sudoku_solver --gui
+```bash
+./run_sudoku_solver.sh
+```
 
 This script will:
-1. Check if the required ports are available
-2. Build the C++ backend if needed
-3. Start the frontend server
-4. Start the backend server
-5. Open the application in your default browser
 
-Once started, you can access the application at: http://localhost:5173
+1. Check if the required ports are available  
+2. Build the C++ backend if needed  
+3. Start the frontend server  
+4. Start the backend server  
+5. Open the application in your default browser  
 
-### Manual Setup
+Once started, access the application at:  
+[http://localhost:5173](http://localhost:5173)
+
+---
+
+### 🛠 Manual Setup
 
 If you prefer to set up the application manually:
 
 #### Backend Setup
 
-# Sudoku Graph Implementation
+1. Create a build directory and navigate into it:
 
-## Overview
-This project implements a custom graph data structure for representing a Sudoku puzzle as a constraint satisfaction problem. All data structures are built from scratch without using the STL library.
+```bash
+mkdir -p build && cd build
+```
 
-## Files
-- `graph.h`: Contains class declarations for Edge, Node, and Graph
-- `graph.cpp`: Contains the implementation of all methods
+2. Configure with CMake:
 
-## Structure
-- **Edge**: Represents connections between Sudoku cells that constrain each other
-- **Node**: Represents a single Sudoku cell with position, value, and domain information
-- **Graph**: Manages the entire puzzle with methods to build and validate Sudoku constraints
+```bash
+cmake ..
+```
 
-## Features
-- Represents Sudoku constraints (row, column, box) as graph edges
-- Tracks possible values (domain) for each cell
-- Provides methods to check if values are valid for specific cells
-- Includes visualization of the Sudoku grid
+3. Build the backend:
 
-## Usage
+```bash
+make
+```
+
+4. Run the backend:
+
+```bash
+./sudoku_solver --gui
+```
+
+---
+
+## 📘 Sudoku Graph Implementation
+
+### Overview
+
+This project implements a custom graph data structure to model a Sudoku puzzle as a constraint satisfaction problem. All data structures are built from scratch — no STL.
+
+---
+
+### 📁 Files
+
+- `graph.h` – Class declarations for `Edge`, `Node`, and `Graph`  
+- `graph.cpp` – Method implementations
+
+---
+
+### 🔧 Structure
+
+- **Edge**: Represents constraints (e.g., shared row, column, or box) between cells  
+- **Node**: Represents a Sudoku cell, including its position, value, and possible domain values  
+- **Graph**: Manages the overall puzzle, building and enforcing Sudoku rules
+
+---
+
+### ✨ Features
+
+- Graph-based modeling of Sudoku rules (rows, columns, boxes)  
+- Domain tracking for each cell  
+- Validity checking for value assignments  
+- Optional visualization of the Sudoku grid
+
+---
+
+### ▶️ Usage
+
+To use the backend or graph solver independently, compile and run the `sudoku_solver` binary with appropriate flags. The GUI will also utilize this solver internally when launched.
+
+---
